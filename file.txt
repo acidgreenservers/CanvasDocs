@@ -1,0 +1,25 @@
+
+### Identified Issues
+
+1. **Type Change Not Visible**: Type selector doesn't show active state properly
+2. **Content Not Syncing**: Form state can diverge from actual node state
+3. **Debounce Race Conditions**: Rapid changes can cause stale updates
+4. **Missing Validation Feedback**: User doesn't see validation errors
+5. **No Dirty State Tracking**: Can't tell if changes are pending
+6. **Connection Display Incomplete**: Only shows IDs, not connection types
+
+### Boundaries
+
+1. **Security Boundary**: All content must be validated before state update
+2. **State Boundary**: Form state must stay synchronized with canvas state
+3. **UI Boundary**: Visual feedback must reflect actual state
+4. **Type Boundary**: Node type changes must propagate immediately
+
+### Relationships to Connect
+
+1. `node.type` → Type selector visual state
+2. `node.title` → Title input value
+3. `node.content` → Content textarea value
+4. `node.connections` → Connection list display
+5. Form dirty state → Save indicator
+6. Validation state → Error display

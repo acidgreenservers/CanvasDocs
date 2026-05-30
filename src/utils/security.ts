@@ -81,7 +81,7 @@ export function validateContent(content: unknown): ValidationResult {
 export function generateSecureId(): string {
   const array = new Uint32Array(4);
   crypto.getRandomValues(array);
-  return Array.from(array, (n) => n.toString(16)).join('-');
+  return Array.from(array, (n) => n.toString(16).padStart(8, '0')).join('-');
 }
 
 /**

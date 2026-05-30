@@ -54,16 +54,7 @@ export default function App() {
   }, [canvas]);
   
   const handleAddConnectedNode = useCallback((parentId: string, newNode: CanvasNode) => {
-    canvas.setNodes({
-      ...canvas.nodes,
-      [newNode.id]: newNode,
-    });
-    
-    canvas.updateNode(parentId, {
-      connections: [...(canvas.nodes[parentId]?.connections || []), { targetId: newNode.id, type: 'follows', createdAt: Date.now() }],
-    });
-    
-    canvas.selectNode(newNode.id);
+    canvas.addConnectedNode(parentId, newNode);
   }, [canvas]);
   
   const { nodes, nodeList, selectedNodeId, connectingFromId, focusState, stats } = canvas;
@@ -114,7 +105,7 @@ export default function App() {
               <button
                 key={tab.id}
                 onClick={() => setSidebarTab(tab.id)}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all focus:outline-none ${
                   sidebarTab === tab.id
                     ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d]'
                     : 'text-[#8b949e] hover:text-[#e6edf3] hover:bg-[rgba(255,255,255,0.05)]'

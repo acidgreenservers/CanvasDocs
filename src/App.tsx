@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useRef } from 'react';
-import { CanvasNode } from './types/canvas';
+import { CanvasNode, ConnectionType } from './types/canvas';
 import { useCanvasState } from './hooks/useCanvasState';
 import { CanvasNodeComponent } from './components/CanvasNode';
 import { CanvasConnections } from './components/CanvasConnections';
@@ -53,8 +53,8 @@ export default function App() {
     canvas.addNode(position);
   }, [canvas]);
   
-  const handleAddConnectedNode = useCallback((parentId: string, newNode: CanvasNode) => {
-    canvas.addConnectedNode(parentId, newNode);
+  const handleAddConnectedNode = useCallback((parentId: string, newNode: CanvasNode, connectionType: ConnectionType) => {
+    canvas.addConnectedNode(parentId, newNode, connectionType);
   }, [canvas]);
   
   const { nodes, nodeList, selectedNodeId, connectingFromId, focusState, stats } = canvas;

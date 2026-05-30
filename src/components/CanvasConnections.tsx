@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { CanvasNode } from '../types/canvas';
+import { CanvasNode, CONNECTION_TYPE_COLORS } from '../types/canvas';
 import { FocusState } from '../types/focus';
 
 interface ConnectionPathProps {
@@ -14,6 +14,7 @@ interface ConnectionPathProps {
   sourceY: number;
   targetX: number;
   targetY: number;
+  color: string;
   isHighlighted: boolean;
   isFaded: boolean;
 }
@@ -24,6 +25,7 @@ const ConnectionPath = memo(function ConnectionPath({
   sourceY,
   targetX,
   targetY,
+  color,
   isHighlighted,
   isFaded,
 }: ConnectionPathProps) {
@@ -35,7 +37,7 @@ const ConnectionPath = memo(function ConnectionPath({
       <path
         d={path}
         fill="none"
-        stroke={isHighlighted ? '#22c55e' : '#475569'}
+        stroke={isHighlighted ? '#22c55e' : color}
         strokeWidth={isHighlighted ? 3 : 2}
         className="transition-all duration-200"
       />
@@ -64,6 +66,7 @@ export const CanvasConnections = memo(function CanvasConnections({
       sourceY: number;
       targetX: number;
       targetY: number;
+      color: string;
       isHighlighted: boolean;
       isFaded: boolean;
     }> = [];
@@ -99,6 +102,7 @@ export const CanvasConnections = memo(function CanvasConnections({
           sourceY: node.position.y + 40,
           targetX: target.position.x,
           targetY: target.position.y + 40,
+          color: CONNECTION_TYPE_COLORS[conn.type] || '#475569',
           isHighlighted,
           isFaded,
         });
@@ -117,6 +121,7 @@ export const CanvasConnections = memo(function CanvasConnections({
           sourceY={conn.sourceY}
           targetX={conn.targetX}
           targetY={conn.targetY}
+          color={conn.color}
           isHighlighted={conn.isHighlighted}
           isFaded={conn.isFaded}
         />

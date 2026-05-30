@@ -5,9 +5,11 @@
  * Layout: Extended width for better editing experience
  */
 
-import React, { memo, useCallback } from 'react';
-import { CanvasNode, NodeType } from '../types/canvas';
+import React, { memo, useCallback, useState } from 'react';
+import { CanvasNode, NodeType, ConnectionType } from '../types/canvas';
 import { useNodeEditor } from '../hooks/useNodeEditor';
+import { generateSecureId } from '../utils/security';
+import { ConnectionTypeSelector } from './ConnectionTypeSelector';
 
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -220,7 +222,7 @@ interface NodeEditorProps {
   allNodes: Record<string, CanvasNode>;
   onUpdate: (id: string, updates: Partial<CanvasNode>) => void;
   onDelete: (id: string) => void;
-  onAddConnected: (parentId: string, newNode: CanvasNode) => void;
+  onAddConnected: (parentId: string, newNode: CanvasNode, connectionType: ConnectionType) => void;
 }
 
 export const NodeEditor = memo(function NodeEditor({
@@ -237,11 +239,13 @@ export const NodeEditor = memo(function NodeEditor({
     autoSave: true,
   });
   
+  const [connectionType, setConnectionType] = useState<ConnectionType>('follows');
+  
   const handleAddConnected = useCallback(() => {
     if (!node) return;
     
     const newNode: CanvasNode = {
-      id: crypto.randomUUID(),
+      id: generateSecureId(),
       type: 'paragraph',
       title: 'New Node',
       content: '',
@@ -251,8 +255,8 @@ export const NodeEditor = memo(function NodeEditor({
       updatedAt: Date.now(),
     };
     
-    onAddConnected(node.id, newNode);
-  }, [node, onAddConnected]);
+    onAddConnected(node.id, newNode, connectionType);
+  }, [node, onAddConnected, connectionType]);
   
   const handleDelete = useCallback(() => {
     if (node && confirm('Delete this node?')) {
@@ -392,6 +396,12 @@ export const NodeEditor = memo(function NodeEditor({
       
       {/* Actions - Consistent button styling */}
       <div className="p-5 border-t border-[#30363d] space-y-3">
+        {/* Connection Type */}
+        <ConnectionTypeSelector
+          selectedType={connectionType}
+          onSelect={setConnectionType}
+        />
+        
         {/* Add Connected Node - Success/Green style */}
         <button
           onClick={handleAddConnected}

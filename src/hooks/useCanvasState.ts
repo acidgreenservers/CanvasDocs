@@ -142,7 +142,7 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
     setFocusConfig(DEFAULT_FOCUS_CONFIG);
   }, []);
   
-  const addConnectedNode = useCallback((parentId: string, newNode: CanvasNode) => {
+  const addConnectedNode = useCallback((parentId: string, newNode: CanvasNode, connectionType: ConnectionType = 'follows') => {
     setNodes(prev => {
       const parent = prev[parentId];
       if (!parent) return prev;
@@ -152,7 +152,7 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
         [newNode.id]: newNode,
         [parentId]: {
           ...parent,
-          connections: [...parent.connections, { targetId: newNode.id, type: 'follows' as const, createdAt: Date.now() }],
+          connections: [...parent.connections, { targetId: newNode.id, type: connectionType, createdAt: Date.now() }],
           updatedAt: Date.now(),
         },
       };

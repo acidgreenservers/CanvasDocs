@@ -23,31 +23,31 @@ const NODE_TYPES: { value: NodeType; label: string; description: string }[] = [
 
 const TYPE_COLORS: Record<NodeType, { bg: string; border: string; text: string; glow: string }> = {
   section: {
-    bg: 'rgba(34, 197, 94, 0.12)',
+    bg: 'rgba(34, 197, 94, 0.25)',
     border: 'rgba(34, 197, 94, 0.4)',
     text: '#22c55e',
     glow: '0 0 20px rgba(34, 197, 94, 0.3)',
   },
   heading: {
-    bg: 'rgba(59, 110, 248, 0.12)',
+    bg: 'rgba(59, 110, 248, 0.25)',
     border: 'rgba(59, 110, 248, 0.4)',
     text: '#3b6ef8',
     glow: '0 0 20px rgba(59, 110, 248, 0.3)',
   },
   paragraph: {
-    bg: 'rgba(139, 92, 246, 0.12)',
+    bg: 'rgba(139, 92, 246, 0.25)',
     border: 'rgba(139, 92, 246, 0.4)',
     text: '#8b5cf6',
     glow: '0 0 20px rgba(139, 92, 246, 0.3)',
   },
   code: {
-    bg: 'rgba(245, 158, 11, 0.12)',
+    bg: 'rgba(245, 158, 11, 0.25)',
     border: 'rgba(245, 158, 11, 0.4)',
     text: '#f59e0b',
     glow: '0 0 20px rgba(245, 158, 11, 0.3)',
   },
   list: {
-    bg: 'rgba(236, 72, 153, 0.12)',
+    bg: 'rgba(236, 72, 153, 0.25)',
     border: 'rgba(236, 72, 153, 0.4)',
     text: '#ec4899',
     glow: '0 0 20px rgba(236, 72, 153, 0.3)',
@@ -106,6 +106,7 @@ const TypeSelector = memo(function TypeSelector({ currentType, onChange }: TypeS
             <button
               key={type.value}
               onClick={() => onChange(type.value)}
+              aria-pressed={isActive}
               className={`relative px-2 py-2.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
                 isActive
                   ? 'text-white hover:-translate-y-0.5'

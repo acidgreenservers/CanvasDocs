@@ -7,11 +7,14 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import { CanvasNode, ConnectionType } from './types/canvas';
+import { NodeTemplate } from './types/templates';
 import { useCanvasState } from './hooks/useCanvasState';
 import { CanvasNodeComponent } from './components/CanvasNode';
 import { CanvasConnections } from './components/CanvasConnections';
 import { NodeEditor } from './components/NodeEditor';
 import { ExportPanel } from './components/ExportPanel';
+import { TemplateSelector } from './components/TemplateSelector';
+import { TemplateCreator } from './components/TemplateCreator';
 
 // Shared button styles
 const PRIMARY_BUTTON_STYLE = {
@@ -21,12 +24,14 @@ const PRIMARY_BUTTON_STYLE = {
   shadow: '0 4px 12px rgba(59, 110, 248, 0.3)',
 };
 
-type SidebarTab = 'nodes' | 'focus' | 'validation';
+type SidebarTab = 'nodes' | 'templates' | 'focus' | 'validation';
 
 export default function App() {
   const canvas = useCanvasState();
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('nodes');
   const [showExport, setShowExport] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState<NodeTemplate[]>([]);
+  const [showCreator, setShowCreator] = useState(false);
   
   const canvasRef = useRef<HTMLDivElement>(null);
   
@@ -56,6 +61,15 @@ export default function App() {
   const handleAddConnectedNode = useCallback((parentId: string, newNode: CanvasNode, connectionType: ConnectionType) => {
     canvas.addConnectedNode(parentId, newNode, connectionType);
   }, [canvas]);
+  
+  const handleTemplateSelect = useCallback((templateNodes: CanvasNode[]) => {
+    canvas.addNodes(templateNodes);
+  }, [canvas]);
+  
+  const handleTemplateSave = useCallback((template: NodeTemplate) => {
+    setCustomTemplates(prev => [...prev, template]);
+    setShowCreator(false);
+  }, []);
   
   const { nodes, nodeList, selectedNodeId, connectingFromId, focusState, stats } = canvas;
   
@@ -99,6 +113,7 @@ export default function App() {
           <nav className="p-3 space-y-1">
             {[
               { id: 'nodes' as const, label: 'Nodes', icon: '⚡' },
+              { id: 'templates' as const, label: 'Templates', icon: '📋' },
               { id: 'focus' as const, label: 'Focus', icon: '🔍' },
               { id: 'validation' as const, label: 'Validation', icon: '✓' },
             ].map(tab => (
@@ -209,17 +224,56 @@ export default function App() {
           )}
         </div>
         
-        {/* Editor panel - Extended width: 320px + 25px = 345px */}
-        <aside className="w-[345px] bg-[#161b22] border-l border-[#30363d]">
-          <NodeEditor
-            node={selectedNodeId ? nodes[selectedNodeId] : null}
-            allNodes={nodes}
-            onUpdate={canvas.updateNode}
-            onDelete={canvas.deleteNode}
-            onAddConnected={handleAddConnectedNode}
-          />
+        {/* Right panel */}
+        <aside className="w-[345px] bg-[#161b22] border-l border-[#30363d] overflow-y-auto">
+          {sidebarTab === 'templates' ? (
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 
+                  className="text-lg font-normal text-[#e6edf3]"
+                  style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+                >
+                  Templates
+                </h2>
+                <button
+                  onClick={() => setShowCreator(true)}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-[#21262d] text-[#e6edf3] border border-[#30363d] hover:bg-[#30363d] transition-colors"
+                  disabled={selectedNodeId === null}
+                  title={selectedNodeId ? 'Save selected node as template' : 'Select a node first'}
+                >
+                  + Save as Template
+                </button>
+              </div>
+              <TemplateSelector
+                customTemplates={customTemplates}
+                onSelect={handleTemplateSelect}
+              />
+            </div>
+          ) : (
+            <NodeEditor
+              node={selectedNodeId ? nodes[selectedNodeId] : null}
+              allNodes={nodes}
+              onUpdate={canvas.updateNode}
+              onDelete={canvas.deleteNode}
+              onAddConnected={handleAddConnectedNode}
+            />
+          )}
         </aside>
       </div>
+      
+      {/* Template Creator modal */}
+      {showCreator && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-[#161b22] border border-[#30363d] rounded-xl w-[480px] max-h-[80vh] overflow-y-auto p-6">
+            <TemplateCreator
+              nodes={nodes}
+              selectedNodeIds={selectedNodeId ? [selectedNodeId] : []}
+              onSave={handleTemplateSave}
+              onClose={() => setShowCreator(false)}
+            />
+          </div>
+        </div>
+      )}
       
       {/* Export modal */}
       {showExport && (

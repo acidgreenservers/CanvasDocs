@@ -142,6 +142,16 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
     setFocusConfig(DEFAULT_FOCUS_CONFIG);
   }, []);
   
+  const addNodes = useCallback((newNodes: CanvasNode[]) => {
+    setNodes(prev => {
+      const updated = { ...prev };
+      for (const node of newNodes) {
+        updated[node.id] = node;
+      }
+      return updated;
+    });
+  }, []);
+  
   const addConnectedNode = useCallback((parentId: string, newNode: CanvasNode, connectionType: ConnectionType = 'follows') => {
     setNodes(prev => {
       const parent = prev[parentId];
@@ -281,6 +291,7 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
     // Node operations
     addNode,
     addConnectedNode,
+    addNodes,
     updateNode,
     deleteNode,
     setNodes: setNodesBatch,

@@ -15,7 +15,7 @@ import {
   PLACEHOLDER_PATTERN,
   TEMPLATE_SCHEMA_VERSION 
 } from '../types/templates';
-import { NodeType, ConnectionType, CONNECTION_TYPES } from '../types/canvas';
+import { NodeType, ConnectionType } from '../types/canvas';
 import { generateSecureId, validateContent } from './security';
 
 // Dangerous patterns to detect in template content
@@ -195,8 +195,10 @@ function validateTemplateNode(node: unknown, nodeIndex: number): { isValid: bool
   return { isValid: true, errors: [], sanitized: sanitizedNode };
 }
 
+const CONNECTION_TYPES_LIST: ConnectionType[] = ['follows', 'depends-on', 'contradicts', 'extends', 'references'];
+
 function validConnectionType(type: unknown): type is ConnectionType {
-  return CONNECTION_TYPES.includes(type as ConnectionType);
+  return CONNECTION_TYPES_LIST.includes(type as ConnectionType);
 }
 
 /**

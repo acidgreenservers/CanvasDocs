@@ -94,12 +94,12 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
       if (updates.title !== undefined) {
         const validation = validateContent(updates.title);
         if (!validation.isValid) return prev;
-        updates.title = validation.sanitizedContent;
+        updates.title = validation.sanitizedContent ?? undefined;
       }
       if (updates.content !== undefined) {
         const validation = validateContent(updates.content);
         if (!validation.isValid) return prev;
-        updates.content = validation.sanitizedContent;
+        updates.content = validation.sanitizedContent ?? undefined;
       }
       
       return {
@@ -170,7 +170,7 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
           ...nodesPrev,
           [prev]: {
             ...source,
-            connections: [...source.connections, { targetId, type }],
+            connections: [...source.connections, { targetId, type, createdAt: Date.now() }],
             updatedAt: Date.now(),
           },
         };

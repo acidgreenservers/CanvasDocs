@@ -54,13 +54,13 @@ export default function App() {
   }, [canvas]);
   
   const handleAddConnectedNode = useCallback((parentId: string, newNode: CanvasNode) => {
-    canvas.setNodes(prev => ({
-      ...prev,
+    canvas.setNodes({
+      ...canvas.nodes,
       [newNode.id]: newNode,
-    }));
+    });
     
     canvas.updateNode(parentId, {
-      connections: [...(canvas.nodes[parentId]?.connections || []), { targetId: newNode.id, type: 'follows' }],
+      connections: [...(canvas.nodes[parentId]?.connections || []), { targetId: newNode.id, type: 'follows', createdAt: Date.now() }],
     });
     
     canvas.selectNode(newNode.id);
@@ -197,7 +197,7 @@ export default function App() {
               isSelected={selectedNodeId === node.id}
               isConnecting={connectingFromId !== null}
               isFaded={focusState.config.enabled && focusState.fadedNodeIds.has(node.id)}
-              showDepth={focusState.config.showDepth}
+              showDepth={focusState.config.showDepthLabels}
               depth={focusState.nodeDepths.get(node.id) ?? null}
               onSelect={canvas.selectNode}
               onDragStart={canvas.startDrag}

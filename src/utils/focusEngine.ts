@@ -301,11 +301,12 @@ export function suggestFocusNode(
 /**
  * Create focus config from preset
  */
-export function applyFocusPreset(
+export async function applyFocusPreset(
   presetName: keyof typeof import('../types/focus').FOCUS_PRESETS,
   currentConfig: FocusConfig
-): FocusConfig {
-  const preset = import('../types/focus').FOCUS_PRESETS[presetName];
+): Promise<FocusConfig> {
+  const focusModule = await import('../types/focus');
+  const preset = focusModule.FOCUS_PRESETS[presetName];
   return {
     ...currentConfig,
     ...preset,

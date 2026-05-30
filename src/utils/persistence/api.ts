@@ -15,6 +15,7 @@ import {
   PersistenceError,
   DocumentType,
   CanvasContent,
+  DocumentContent,
 } from '../../types/persistence';
 import { CanvasNode } from '../../types/canvas';
 import { 
@@ -75,10 +76,10 @@ export async function createDocument(
       updatedAt: now,
       version: 1,
     },
-    content: initialContent || {
+    content: (initialContent || {
       nodes: {},
       viewport: { zoom: 1, panX: 0, panY: 0 },
-    },
+    }) as DocumentContent,
     uiState: {
       selectedNodeId: null,
       expandedPanels: [],
@@ -189,20 +190,21 @@ export async function exportDocument(
   let nodes: Record<string, CanvasNode>;
   
   if ('nodes' in doc.content) {
+    const canvasContent = doc.content as CanvasContent;
     if (options.chainRootId) {
       // Export specific chain
-      nodes = extractChain(doc.content.nodes, options.chainRootId);
+      nodes = extractChain(canvasContent.nodes, options.chainRootId);
     } else if (options.nodeIds) {
       // Export specific nodes
       nodes = {};
       options.nodeIds.forEach(id => {
-        if (doc.content.nodes[id]) {
-          nodes[id] = doc.content.nodes[id];
+        if (canvasContent.nodes[id]) {
+          nodes[id] = canvasContent.nodes[id];
         }
       });
     } else {
       // Export all
-      nodes = doc.content.nodes;
+      nodes = canvasContent.nodes;
     }
   } else {
     throw createError('CORRUPTED_DATA', 'Document does not contain canvas data');
@@ -424,5 +426,9 @@ function parseMarkdownToNodes(markdown: string): Record<string, CanvasNode> {
 }
 
 function createError(type: PersistenceError['type'], message: string): PersistenceError {
-  return { type, message };
+  const err = new Error(message) as PersistenceError;
+  err.type = type;
+  err.message = message;
+  err.name = 'PersistenceError';
+  return err;
 }

@@ -120,7 +120,7 @@ export async function initDB(): Promise<IDBDatabase> {
     };
     
     request.onerror = () => {
-      reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to open database', request.error));
+      reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to open database', request.error ?? undefined));
     };
     
     request.onblocked = () => {
@@ -197,12 +197,12 @@ export async function saveDocument(doc: StoredDocument): Promise<number> {
         if (error instanceof DOMException && error.name === 'QuotaExceededError') {
           reject(createPersistenceError('QUOTA_EXCEEDED', 'Storage quota exceeded. Please export or delete old documents.', error));
         } else {
-          reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to save document', error));
+          reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to save document', error ?? undefined));
         }
       };
       
       transaction.onerror = () => {
-        reject(createPersistenceError('TRANSACTION_FAILED', 'Transaction failed', transaction.error));
+        reject(createPersistenceError('TRANSACTION_FAILED', 'Transaction failed', transaction.error ?? undefined));
       };
     } catch (error) {
       reject(createPersistenceError('UNKNOWN', 'Unexpected error during save', error as Error));
@@ -250,7 +250,7 @@ export async function loadDocument(docId: number): Promise<StoredDocument | null
       };
       
       request.onerror = () => {
-        reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to load document', request.error));
+        reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to load document', request.error ?? undefined));
       };
     } catch (error) {
       reject(createPersistenceError('UNKNOWN', 'Unexpected error during load', error as Error));
@@ -281,7 +281,7 @@ export async function deleteDocument(docId: number): Promise<void> {
       };
       
       transaction.onerror = () => {
-        reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to delete document', transaction.error));
+        reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to delete document', transaction.error ?? undefined));
       };
     } catch (error) {
       reject(createPersistenceError('UNKNOWN', 'Unexpected error during delete', error as Error));
@@ -365,7 +365,7 @@ export async function listDocuments(filter?: import('../../types/persistence').D
       };
       
       request.onerror = () => {
-        reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to list documents', request.error));
+        reject(createPersistenceError('TRANSACTION_FAILED', 'Failed to list documents', request.error ?? undefined));
       };
     } catch (error) {
       reject(createPersistenceError('UNKNOWN', 'Unexpected error during list', error as Error));
@@ -492,12 +492,13 @@ function createPersistenceError(
   originalError?: Error,
   docId?: number
 ): PersistenceError {
-  return {
-    type,
-    message,
-    originalError,
-    docId,
-  };
+  const err = new Error(message) as PersistenceError;
+  err.type = type;
+  err.message = message;
+  err.name = 'PersistenceError';
+  err.originalError = originalError;
+  if (docId !== undefined) err.docId = docId;
+  return err;
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -54,8 +54,14 @@ export function ValidationPanel({
   const [selectedSeverity, setSelectedSeverity] = useState<ValidationSeverity | 'all'>('all');
   
   // Group issues by category
-  const issuesByCategory = useMemo(() => {
-    if (!validationResult) return {};
+  const issuesByCategory = useMemo<Record<ValidationCategory, ValidationIssue[]>>(() => {
+    if (!validationResult) return {
+      structure: [],
+      content: [],
+      connections: [],
+      completeness: [],
+      security: [],
+    };
     
     const grouped: Record<ValidationCategory, ValidationIssue[]> = {
       structure: [],

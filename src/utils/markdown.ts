@@ -60,9 +60,9 @@ export function generateMarkdown(
     output.push(nodeToMarkdown(node, includeMetadata));
     
     // Traverse connections in order
-    node.connections.forEach((connectedId) => {
-      if (selectedIds.length === 0 || selectedIds.includes(connectedId)) {
-        traverse(connectedId);
+    node.connections.forEach((conn) => {
+      if (selectedIds.length === 0 || selectedIds.includes(conn.targetId)) {
+        traverse(conn.targetId);
       }
     });
   }
@@ -72,7 +72,7 @@ export function generateMarkdown(
     ? selectedIds 
     : Object.keys(nodes).filter(id => {
         // Find root nodes (nodes not connected TO by other nodes)
-        return !Object.values(nodes).some(n => n.connections.includes(id));
+        return !Object.values(nodes).some(n => n.connections.some(c => c.targetId === id));
       });
   
   startNodes.forEach(id => traverse(id));

@@ -111,7 +111,15 @@ export const CanvasConnections = memo(function CanvasConnections({
   return (
     <svg className="absolute inset-0 w-full h-full pointer-events-none">
       {connections.map(conn => (
-        <ConnectionPath key={conn.key} {...conn} />
+        <ConnectionPath
+          key={conn.key}
+          sourceX={conn.sourceX}
+          sourceY={conn.sourceY}
+          targetX={conn.targetX}
+          targetY={conn.targetY}
+          isHighlighted={conn.isHighlighted}
+          isFaded={conn.isFaded}
+        />
       ))}
     </svg>
   );

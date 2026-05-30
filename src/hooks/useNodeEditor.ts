@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { CanvasNode, NodeType } from '../types/canvas';
-import { validateContent, ValidationResult } from './useCanvasState';
+import { validateContent, ValidationResult } from '../utils/security';
 
 export interface NodeEditorState {
   title: string;
@@ -54,7 +54,7 @@ export function useNodeEditor(options: UseNodeEditorOptions) {
   // ═══════════════════════════════════════════════════════════════
   
   const [formState, setFormState] = useState<NodeEditorState>(DEFAULT_STATE);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastUpdateRef = useRef<number>(0);
   
   // Track the node ID we're editing to detect node switches

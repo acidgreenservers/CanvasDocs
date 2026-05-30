@@ -4,7 +4,15 @@
  * Security invariant: No unsanitized content reaches the DOM or exports
  */
 
-import { ValidationResult } from '../types/canvas';
+/**
+ * Validation result for content security checks
+ * Security: Separate from structural validation to avoid circular dependencies
+ */
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  sanitizedContent: string | null;
+}
 
 // HTML entity escaping for XSS prevention
 const HTML_ENTITIES: Record<string, string> = {
@@ -37,7 +45,7 @@ export function validateContent(content: unknown): ValidationResult {
   const errors: string[] = [];
   
   if (typeof content !== 'string') {
-    return { isValid: false, errors: ['Content must be a string'] };
+    return { isValid: false, errors: ['Content must be a string'], sanitizedContent: null };
   }
   
   // Length boundary check

@@ -101,9 +101,10 @@ export type PersistenceErrorType =
   | 'UNSUPPORTED_BROWSER'
   | 'UNKNOWN';
 
-export interface PersistenceError {
+export interface PersistenceError extends Error {
   type: PersistenceErrorType;
   message: string;
+  name: string;
   originalError?: Error;
   docId?: number;
 }

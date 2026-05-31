@@ -5,7 +5,7 @@
  * Security: Content validation before render
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { CanvasNode as CanvasNodeType } from '../types/canvas';
 import { validateContent } from '../utils/security';
 
@@ -18,7 +18,7 @@ interface CanvasNodeProps {
   depth?: number | null;
   onSelect: (id: string) => void;
   onDragStart: (id: string, e: React.MouseEvent) => void;
-  onConnectionStart: (id: string) => void;
+  onConnectionStart: (id: string, type?: ConnectionType) => void;
   onConnectionEnd: (id: string) => void;
 }
 
@@ -39,6 +39,16 @@ const NODE_TYPE_LABELS: Record<string, string> = {
   list: 'LIST',
 };
 
+import { CONNECTION_TYPE_LABELS, CONNECTION_TYPE_COLORS, ConnectionType } from '../types/canvas';
+
+const CONNECTION_TYPE_OPTIONS: { type: ConnectionType; label: string; icon: string; color: string }[] = [
+  { type: 'follows' as ConnectionType, label: 'Follows', icon: '↓', color: CONNECTION_TYPE_COLORS.follows },
+  { type: 'extends' as ConnectionType, label: 'Extends', icon: '⊕', color: CONNECTION_TYPE_COLORS.extends },
+  { type: 'depends-on' as ConnectionType, label: 'Depends On', icon: '⊳', color: CONNECTION_TYPE_COLORS['depends-on'] },
+  { type: 'contradicts' as ConnectionType, label: 'Contradicts', icon: '⊘', color: CONNECTION_TYPE_COLORS.contradicts },
+  { type: 'references' as ConnectionType, label: 'References', icon: '↗', color: CONNECTION_TYPE_COLORS.references },
+];
+
 export const CanvasNodeComponent = memo(function CanvasNodeComponent({
   node,
   isSelected,
@@ -51,6 +61,7 @@ export const CanvasNodeComponent = memo(function CanvasNodeComponent({
   onConnectionStart,
   onConnectionEnd,
 }: CanvasNodeProps) {
+  const [showConnMenu, setShowConnMenu] = useState(false);
   // Memoize styles lookup
   const styles = NODE_STYLES[node.type] || NODE_STYLES.paragraph;
   const typeLabel = NODE_TYPE_LABELS[node.type] || 'NODE';
@@ -83,8 +94,17 @@ export const CanvasNodeComponent = memo(function CanvasNodeComponent({
   
   const handleConnectionClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    onConnectionStart(node.id);
+    setShowConnMenu(prev => !prev);
+  }, []);
+  
+  const handleConnTypeSelect = useCallback((type: ConnectionType) => {
+    setShowConnMenu(false);
+    onConnectionStart(node.id, type);
   }, [node.id, onConnectionStart]);
+  
+  const handleConnMenuClose = useCallback(() => {
+    setShowConnMenu(false);
+  }, []);
   
   // Memoize connection count text
   const connectionText = useMemo(() => {
@@ -129,15 +149,38 @@ export const CanvasNodeComponent = memo(function CanvasNodeComponent({
             <span className="text-[10px] text-[#6e7681] font-mono">D{depth}</span>
           )}
           
-          <button
-            onClick={handleConnectionClick}
-            className="w-5 h-5 rounded-full bg-[#21262d] hover:bg-[#3b6ef8] 
-                       flex items-center justify-center transition-colors border border-[#30363d]
-                       hover:border-[#3b6ef8]"
-            title="Start connection"
-          >
-            <span className="text-[10px] text-[#8b949e]">+</span>
-          </button>
+          <div className="relative">
+            <button
+              onClick={handleConnectionClick}
+              className="w-5 h-5 rounded-full bg-[#21262d] hover:bg-[#3b6ef8] 
+                         flex items-center justify-center transition-colors border border-[#30363d]
+                         hover:border-[#3b6ef8]"
+              title="Start connection"
+            >
+              <span className="text-[10px] text-[#8b949e]">+</span>
+            </button>
+            
+            {showConnMenu && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={handleConnMenuClose}
+                />
+                <div className="absolute right-0 top-7 z-50 w-40 bg-[#161b22] border border-[#30363d] rounded-lg shadow-xl overflow-hidden">
+                  {CONNECTION_TYPE_OPTIONS.map(opt => (
+                    <button
+                      key={opt.type}
+                      onClick={() => handleConnTypeSelect(opt.type)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[#e6edf3] hover:bg-[#21262d] transition-colors"
+                    >
+                      <span style={{ color: opt.color }}>{opt.icon}</span>
+                      <span>{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
       

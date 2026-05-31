@@ -7,6 +7,8 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { CanvasNode, ConnectionType } from '../types/canvas';
+import { CanvasZone } from '../types/zones';
+import { CanvasSnapshot } from '../types/snapshots';
 import { ValidationResult } from '../types/validation';
 import { FocusConfig, FocusState, DEFAULT_FOCUS_CONFIG } from '../types/focus';
 import { generateSecureId, isValidNodeId, validateContent } from '../utils/security';
@@ -27,6 +29,8 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [connectingFromId, setConnectingFromId] = useState<string | null>(null);
   const [focusConfig, setFocusConfig] = useState<FocusConfig>(DEFAULT_FOCUS_CONFIG);
+  const [zones, setZones] = useState<Record<string, CanvasZone>>({});
+  const [snapshots, setSnapshots] = useState<Record<string, CanvasSnapshot>>({});
   
   // Drag state ref - doesn't need to trigger re-renders
   const dragStateRef = useRef<{
@@ -140,6 +144,35 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
     setNodes(newNodes);
     setSelectedNodeId(null);
     setFocusConfig(DEFAULT_FOCUS_CONFIG);
+  }, []);
+  
+  const createZone = useCallback((zone: CanvasZone) => {
+    setZones(prev => ({ ...prev, [zone.id]: zone }));
+  }, []);
+  
+  const createSnapshot = useCallback((snapshot: CanvasSnapshot) => {
+    setSnapshots(prev => ({ ...prev, [snapshot.metadata.id]: snapshot }));
+  }, []);
+  
+  const restoreSnapshot = useCallback((snapshot: CanvasSnapshot) => {
+    setNodes(snapshot.content.nodes);
+    setSelectedNodeId(null);
+  }, []);
+  
+  const deleteSnapshot = useCallback((snapshotId: string) => {
+    setSnapshots(prev => {
+      const updated = { ...prev };
+      delete updated[snapshotId];
+      return updated;
+    });
+  }, []);
+  
+  const deleteZone = useCallback((zoneId: string) => {
+    setZones(prev => {
+      const updated = { ...prev };
+      delete updated[zoneId];
+      return updated;
+    });
   }, []);
   
   const addNodes = useCallback((newNodes: CanvasNode[]) => {
@@ -287,6 +320,8 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
     focusState,
     validationResult,
     stats,
+    zones,
+    snapshots,
     
     // Node operations
     addNode,
@@ -310,6 +345,15 @@ export function useCanvasState(options: UseCanvasStateOptions = {}) {
     
     // Selection
     selectNode,
+    // Zone operations
+    createZone,
+    deleteZone,
+    
+    // Snapshot operations
+    createSnapshot,
+    restoreSnapshot,
+    deleteSnapshot,
+    
     setFocusConfig,
   };
 }

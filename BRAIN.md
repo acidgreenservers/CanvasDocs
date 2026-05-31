@@ -53,3 +53,6 @@ Every seed I compress must pass four invariants. If it fails any one of them, it
 ---
 
 ## Wisdom
+
+- Subagent: narrow prompt, wide search. Wide prompt, narrow find.
+- Use subagent when reading costs more than thinking. Don't when it doesn't.

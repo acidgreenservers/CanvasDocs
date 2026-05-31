@@ -146,13 +146,15 @@ export function SnapshotManager({
           <div className="flex gap-2">
             <Button
               onClick={handleCreate}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white"
+              variant="primary"
+              className="flex-1"
             >
               Create
             </Button>
             <Button
               onClick={() => { setIsCreating(false); setError(null); }}
-              className="flex-1 bg-slate-700 hover:bg-slate-600 text-white"
+              variant="ghost"
+              className="flex-1"
             >
               Cancel
             </Button>
@@ -162,14 +164,16 @@ export function SnapshotManager({
         <div className="p-4 border-b border-slate-700 space-y-2">
           <Button
             onClick={() => setIsCreating(true)}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
+            variant="primary"
+            className="w-full"
           >
             Save Snapshot
           </Button>
           
           <Button
             onClick={() => setCompareMode(!compareMode)}
-            className={`w-full ${compareMode ? 'bg-blue-600 hover:bg-blue-500' : 'bg-slate-700 hover:bg-slate-600'} text-white`}
+            variant={compareMode ? 'primary' : 'ghost'}
+            className="w-full"
           >
             {compareMode ? 'Cancel Compare' : 'Compare Versions'}
           </Button>
@@ -181,7 +185,8 @@ export function SnapshotManager({
         <div className="p-4 bg-blue-900 border-b border-blue-800">
           <Button
             onClick={handleCompare}
-            className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+            variant="primary"
+            className="w-full"
           >
             Compare Selected
           </Button>

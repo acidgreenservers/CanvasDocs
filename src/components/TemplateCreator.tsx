@@ -168,14 +168,14 @@ export function TemplateCreator({
         <div className="px-6 py-4 border-t border-slate-700 flex justify-end gap-3">
           <Button
             onClick={onClose}
-            className="bg-slate-700 hover:bg-slate-600 text-white"
+            variant="ghost"
           >
             Cancel
           </Button>
           <Button
             onClick={handleCreate}
             disabled={isCreating}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white"
+            variant="primary"
           >
             {isCreating ? 'Creating...' : 'Create Template'}
           </Button>

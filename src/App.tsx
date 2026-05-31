@@ -7,11 +7,20 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import { CanvasNode, ConnectionType } from './types/canvas';
+import { NodeTemplate } from './types/templates';
 import { useCanvasState } from './hooks/useCanvasState';
 import { CanvasNodeComponent } from './components/CanvasNode';
 import { CanvasConnections } from './components/CanvasConnections';
 import { NodeEditor } from './components/NodeEditor';
 import { ExportPanel } from './components/ExportPanel';
+import { TemplateSelector } from './components/TemplateSelector';
+import { TemplateCreator } from './components/TemplateCreator';
+import { CanvasZoneManager } from './components/CanvasZoneManager';
+import { ZoneOverlay } from './components/ZoneOverlay';
+import { ValidationPanel } from './components/ValidationPanel';
+import { SnapshotManager } from './components/SnapshotManager';
+import { SnapshotDiffViewer } from './components/SnapshotDiffViewer';
+import { FocusModePanel } from './components/FocusModePanel';
 
 // Shared button styles
 const PRIMARY_BUTTON_STYLE = {
@@ -21,12 +30,15 @@ const PRIMARY_BUTTON_STYLE = {
   shadow: '0 4px 12px rgba(59, 110, 248, 0.3)',
 };
 
-type SidebarTab = 'nodes' | 'focus' | 'validation';
+type SidebarTab = 'nodes' | 'templates' | 'zones' | 'snapshots' | 'focus' | 'validation';
 
 export default function App() {
   const canvas = useCanvasState();
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('nodes');
   const [showExport, setShowExport] = useState(false);
+  const [customTemplates, setCustomTemplates] = useState<NodeTemplate[]>([]);
+  const [showCreator, setShowCreator] = useState(false);
+  const [snapshotDiff, setSnapshotDiff] = useState<{ fromId: string; toId: string } | null>(null);
   
   const canvasRef = useRef<HTMLDivElement>(null);
   
@@ -57,7 +69,16 @@ export default function App() {
     canvas.addConnectedNode(parentId, newNode, connectionType);
   }, [canvas]);
   
-  const { nodes, nodeList, selectedNodeId, connectingFromId, focusState, stats } = canvas;
+  const handleTemplateSelect = useCallback((templateNodes: CanvasNode[]) => {
+    canvas.addNodes(templateNodes);
+  }, [canvas]);
+  
+  const handleTemplateSave = useCallback((template: NodeTemplate) => {
+    setCustomTemplates(prev => [...prev, template]);
+    setShowCreator(false);
+  }, []);
+  
+  const { nodes, nodeList, selectedNodeId, connectingFromId, focusState, stats, zones, snapshots } = canvas;
   
   return (
     <div className="h-screen flex flex-col bg-[#0d1117] text-[#e6edf3] overflow-hidden relative">
@@ -99,6 +120,9 @@ export default function App() {
           <nav className="p-3 space-y-1">
             {[
               { id: 'nodes' as const, label: 'Nodes', icon: '⚡' },
+              { id: 'templates' as const, label: 'Templates', icon: '📋' },
+              { id: 'zones' as const, label: 'Zones', icon: '🗺️' },
+              { id: 'snapshots' as const, label: 'Snapshots', icon: '📸' },
               { id: 'focus' as const, label: 'Focus', icon: '🔍' },
               { id: 'validation' as const, label: 'Validation', icon: '✓' },
             ].map(tab => (
@@ -177,6 +201,22 @@ export default function App() {
             }}
           />
           
+          {/* Zone overlays */}
+          {Object.values(zones).map(zone => (
+            <ZoneOverlay
+              key={zone.id}
+              zone={zone}
+              isSelected={false}
+              nodeCount={Object.values(nodes).filter(n => 
+                n.position.x >= zone.bounds.x && 
+                n.position.x < zone.bounds.x + zone.bounds.width && 
+                n.position.y >= zone.bounds.y && 
+                n.position.y < zone.bounds.y + zone.bounds.height
+              ).length}
+              onSelect={() => {}}
+            />
+          ))}
+          
           {/* Connections */}
           <CanvasConnections nodes={nodes} focusState={focusState} />
           
@@ -209,17 +249,153 @@ export default function App() {
           )}
         </div>
         
-        {/* Editor panel - Extended width: 320px + 25px = 345px */}
-        <aside className="w-[345px] bg-[#161b22] border-l border-[#30363d]">
-          <NodeEditor
-            node={selectedNodeId ? nodes[selectedNodeId] : null}
-            allNodes={nodes}
-            onUpdate={canvas.updateNode}
-            onDelete={canvas.deleteNode}
-            onAddConnected={handleAddConnectedNode}
-          />
+        {/* Right panel */}
+        <aside className="w-[345px] bg-[#161b22] border-l border-[#30363d] overflow-y-auto">
+          {sidebarTab === 'templates' ? (
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 
+                  className="text-lg font-normal text-[#e6edf3]"
+                  style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+                >
+                  Templates
+                </h2>
+                <button
+                  onClick={() => setShowCreator(true)}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-[#21262d] text-[#e6edf3] border border-[#30363d] hover:bg-[#30363d] transition-colors"
+                  disabled={selectedNodeId === null}
+                  title={selectedNodeId ? 'Save selected node as template' : 'Select a node first'}
+                >
+                  + Save as Template
+                </button>
+              </div>
+              <TemplateSelector
+                customTemplates={customTemplates}
+                onSelect={handleTemplateSelect}
+              />
+            </div>
+          ) : sidebarTab === 'zones' ? (
+            <div className="p-4">
+              <h2 
+                className="text-lg font-normal text-[#e6edf3] mb-4"
+                style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+              >
+                Canvas Zones
+              </h2>
+              <CanvasZoneManager
+                zones={zones}
+                nodes={nodes}
+                onCreateZone={canvas.createZone}
+                onDeleteZone={canvas.deleteZone}
+                onMoveNodeToZone={() => {}}
+              />
+            </div>
+          ) : sidebarTab === 'snapshots' ? (
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 
+                  className="text-lg font-normal text-[#e6edf3]"
+                  style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+                >
+                  Snapshots
+                </h2>
+                {snapshotDiff && (
+                  <button
+                    onClick={() => setSnapshotDiff(null)}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-[#21262d] text-[#e6edf3] border border-[#30363d] hover:bg-[#30363d] transition-colors"
+                  >
+                    ← Back
+                  </button>
+                )}
+              </div>
+              {snapshotDiff ? (
+                <SnapshotDiffViewer
+                  diff={canvas.snapshots[snapshotDiff.fromId] && canvas.snapshots[snapshotDiff.toId] ? (() => {
+                    const from = canvas.snapshots[snapshotDiff.fromId];
+                    const to = canvas.snapshots[snapshotDiff.toId];
+                    return {
+                      fromSnapshotId: snapshotDiff.fromId,
+                      toSnapshotId: snapshotDiff.toId,
+                      timestamp: Date.now(),
+                      addedNodes: Object.values(to.content.nodes).filter(n => !from.content.nodes[n.id]),
+                      removedNodes: Object.values(from.content.nodes).filter(n => !to.content.nodes[n.id]),
+                      modifiedNodes: [],
+                      addedConnections: [],
+                      removedConnections: [],
+                      summary: { nodesAdded: 0, nodesRemoved: 0, nodesModified: 0, connectionsAdded: 0, connectionsRemoved: 0 },
+                    };
+                  })() : null as any}
+                  fromSnapshot={canvas.snapshots[snapshotDiff.fromId]}
+                  toSnapshot={canvas.snapshots[snapshotDiff.toId]}
+                  onClose={() => setSnapshotDiff(null)}
+                />
+              ) : (
+                <SnapshotManager
+                  snapshots={canvas.snapshots}
+                  nodes={nodes}
+                  onCreateSnapshot={canvas.createSnapshot}
+                  onRestoreSnapshot={canvas.restoreSnapshot}
+                  onDeleteSnapshot={canvas.deleteSnapshot}
+                  onCompareSnapshots={(fromId, toId) => setSnapshotDiff({ fromId, toId })}
+                />
+              )}
+            </div>
+          ) : sidebarTab === 'focus' ? (
+            <div className="p-4">
+              <h2 
+                className="text-lg font-normal text-[#e6edf3] mb-4"
+                style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+              >
+                Focus Mode
+              </h2>
+              <FocusModePanel
+                focusState={focusState}
+                nodes={nodes}
+                selectedNodeId={selectedNodeId}
+                onFocusChange={canvas.setFocusConfig}
+                onSelectNode={(id) => canvas.selectNode(id)}
+              />
+            </div>
+          ) : sidebarTab === 'validation' ? (
+            <div className="p-4">
+              <h2 
+                className="text-lg font-normal text-[#e6edf3] mb-4"
+                style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+              >
+                Validation
+              </h2>
+              <ValidationPanel
+                validationResult={canvas.validationResult}
+                nodes={nodes}
+                onAutoFix={(fixedNodes) => canvas.setNodes(fixedNodes)}
+                onSelectNode={(id) => canvas.selectNode(id)}
+              />
+            </div>
+          ) : (
+            <NodeEditor
+              node={selectedNodeId ? nodes[selectedNodeId] : null}
+              allNodes={nodes}
+              onUpdate={canvas.updateNode}
+              onDelete={canvas.deleteNode}
+              onAddConnected={handleAddConnectedNode}
+            />
+          )}
         </aside>
       </div>
+      
+      {/* Template Creator modal */}
+      {showCreator && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-[#161b22] border border-[#30363d] rounded-xl w-[480px] max-h-[80vh] overflow-y-auto p-6">
+            <TemplateCreator
+              nodes={nodes}
+              selectedNodeIds={selectedNodeId ? [selectedNodeId] : []}
+              onSave={handleTemplateSave}
+              onClose={() => setShowCreator(false)}
+            />
+          </div>
+        </div>
+      )}
       
       {/* Export modal */}
       {showExport && (

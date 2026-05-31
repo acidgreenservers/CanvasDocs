@@ -5,6 +5,8 @@
  * Structure: Typed export configurations and results
  */
 
+import { ConnectionType } from './canvas';
+
 export type ExportFormat = 'markdown' | 'json' | 'html';
 
 export interface ExportOptions {
@@ -15,13 +17,18 @@ export interface ExportOptions {
   theme: 'dark' | 'light';
 }
 
+export interface ExportableConnection {
+  targetId: string;
+  type: ConnectionType;
+}
+
 export interface ExportableNode {
   id: string;
   type: string;
   title: string;
   content: string;
   depth: number;
-  connections: string[];
+  connections: ExportableConnection[];
   createdAt?: number;
   updatedAt?: number;
 }

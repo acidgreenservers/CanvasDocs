@@ -220,7 +220,11 @@ body {
 }
 
 .connection-line::after {
-  content: '↓';
+  content: '';
+  z-index: 1;
+}
+
+.connection-line-arrow {
   position: relative;
   z-index: 1;
   background: var(--bg-card);
@@ -230,6 +234,17 @@ body {
   font-size: 14px;
   color: var(--emerald-active);
   border: 1px solid var(--border-color);
+}
+
+/* Tributary connection line (non-follows) */
+.connection-line-tributary::before {
+  background: linear-gradient(to bottom, var(--electric-blue), transparent);
+  opacity: 0.5;
+}
+
+.connection-line-tributary .connection-line-arrow {
+  color: var(--electric-blue);
+  border-color: var(--electric-blue);
 }
 
 /* Node card */
@@ -351,6 +366,124 @@ body {
   border: 1px solid var(--border-color);
 }
 
+/* Side content (tributary connections) */
+.side-content {
+  margin-top: 12px;
+}
+
+.side-content-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  transition: background 0.2s;
+}
+
+.side-content-summary:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.side-content-icon {
+  font-size: 14px;
+}
+
+.side-content-label {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.side-content-target {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  opacity: 0.6;
+}
+
+.side-content-body {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.side-content-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s;
+}
+
+.side-content-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Extends connection — collapsible details */
+details.side-content {
+  border-left: 3px solid;
+  padding-left: 8px;
+}
+
+details.side-content summary {
+  cursor: pointer;
+}
+
+details.side-content summary::-webkit-details-marker {
+  color: inherit;
+}
+
+/* Contradicts connection — blockquote admonition */
+blockquote.side-content {
+  border-left: 3px solid;
+  padding-left: 12px;
+  margin: 12px 0;
+  font-style: italic;
+}
+
+blockquote.side-content .side-content-body {
+  border-color: transparent;
+  background: transparent;
+  margin-top: 4px;
+}
+
+/* Depends-on connection — superscript marker */
+sup.side-content {
+  font-size: 11px;
+  vertical-align: super;
+  line-height: 1;
+}
+
+sup.side-content a {
+  text-decoration: none;
+  font-family: var(--font-mono);
+}
+
+/* References connection — inline link */
+.side-content.connection-references {
+  margin-top: 8px;
+}
+
+/* Connection type colors */
+.connection-extends { border-color: var(--conn-extends, #3b82f6); }
+.connection-contradicts { border-color: var(--conn-contradicts, #ef4444); }
+.connection-depends { border-color: var(--conn-depends, #f59e0b); }
+.connection-references { border-color: var(--conn-references, #8b5cf6); }
+
+.connection-extends .side-content-icon { color: #3b82f6; }
+.connection-contradicts .side-content-icon { color: #ef4444; }
+.connection-depends .side-content-icon { color: #f59e0b; }
+.connection-references .side-content-icon { color: #8b5cf6; }
+
 /* Node footer */
 .node-footer {
   padding: 12px 16px;
@@ -359,6 +492,9 @@ body {
 }
 
 .node-connections {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--text-muted);
@@ -366,6 +502,14 @@ body {
 
 .node-connections strong {
   color: var(--emerald-active);
+}
+
+.conn-follows {
+  color: var(--emerald-active);
+}
+
+.conn-side {
+  color: var(--electric-blue);
 }
 
 /* Metadata section */

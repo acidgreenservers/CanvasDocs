@@ -194,7 +194,9 @@ export function FocusModePanel({
             {selectedNodeId && selectedNodeId !== config.focusNodeId && (
               <Button
                 onClick={() => handleSetFocusNode(selectedNodeId)}
-                className="w-full bg-slate-700 hover:bg-slate-600 text-white text-xs"
+                variant="primary"
+                size="sm"
+                className="w-full"
               >
                 Focus on selected node
               </Button>
@@ -349,7 +351,8 @@ export function FocusModePanel({
           <div className="p-4 border-t border-slate-700">
             <Button
               onClick={() => handleEnableFocus(false)}
-              className="w-full bg-slate-700 hover:bg-slate-600 text-white"
+              variant="ghost"
+              className="w-full"
             >
               Exit Focus Mode
             </Button>

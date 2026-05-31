@@ -191,7 +191,8 @@ export function TemplateSelector({
           <Button
             onClick={handleInstantiate}
             disabled={isLoading}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
+            variant="primary"
+            className="w-full"
           >
             {isLoading ? 'Creating...' : 'Create from Template'}
           </Button>

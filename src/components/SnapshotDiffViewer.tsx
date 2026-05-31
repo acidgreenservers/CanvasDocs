@@ -242,7 +242,7 @@ export function SnapshotDiffViewer({
           </div>
           <Button
             onClick={onClose}
-            className="bg-slate-700 hover:bg-slate-600 text-white"
+            variant="ghost"
           >
             Close
           </Button>

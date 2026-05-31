@@ -249,7 +249,8 @@ export function ValidationPanel({
         {autoFixableCount > 0 && (
           <Button
             onClick={handleAutoFix}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
+            variant="primary"
+            className="w-full"
           >
             Auto-fix {autoFixableCount} issue{autoFixableCount !== 1 ? 's' : ''}
           </Button>

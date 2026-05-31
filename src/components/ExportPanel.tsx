@@ -230,7 +230,7 @@ export function ExportPanel({ nodes, selectedNodeIds, onClose }: ExportPanelProp
           <div className="flex items-center gap-3">
             <Button
               onClick={handleExport}
-              className="bg-[#21262d] hover:bg-[#30363d] text-[#e6edf3] border border-[#30363d]"
+              variant="ghost"
             >
               Generate
             </Button>
@@ -238,14 +238,13 @@ export function ExportPanel({ nodes, selectedNodeIds, onClose }: ExportPanelProp
               <>
                 <Button
                   onClick={handleCopy}
-                  className="bg-[#21262d] hover:bg-[#30363d] text-[#e6edf3] border border-[#30363d]"
+                  variant="ghost"
                 >
                   Copy
                 </Button>
                 <Button
                   onClick={handleDownload}
-                  className="bg-[#3b6ef8] hover:bg-[#2d5ce8] text-white"
-                  style={{ boxShadow: '0 4px 12px rgba(59, 110, 248, 0.3)' }}
+                  variant="primary"
                 >
                   ⚡ Download
                 </Button>

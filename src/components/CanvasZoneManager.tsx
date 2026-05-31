@@ -117,13 +117,17 @@ export function CanvasZoneManager({
           <div className="flex gap-2">
             <Button
               onClick={handleCreateZone}
-              className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs"
+              variant="primary"
+              size="sm"
+              className="flex-1"
             >
               Create
             </Button>
             <Button
               onClick={() => { setIsCreating(false); setError(null); }}
-              className="flex-1 bg-slate-700 hover:bg-slate-600 text-white text-xs"
+              variant="ghost"
+              size="sm"
+              className="flex-1"
             >
               Cancel
             </Button>
